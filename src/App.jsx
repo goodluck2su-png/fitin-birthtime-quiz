@@ -4,6 +4,7 @@ import BirthDateInput from './components/quiz/BirthDateInput';
 import TimeKnownCheck from './components/quiz/TimeKnownCheck';
 import TimeSelector from './components/quiz/TimeSelector';
 import QuizQuestion from './components/quiz/QuizQuestion';
+import PreciseAnalysis from './components/quiz/PreciseAnalysis';
 import ResultScreen from './components/quiz/ResultScreen';
 
 function App() {
@@ -11,14 +12,27 @@ function App() {
   const [birthDate, setBirthDate] = useState(null);
   const [birthTime, setBirthTime] = useState(null);
   const [answers, setAnswers] = useState([]);
-  const [estimatedTime, setEstimatedTime] = useState(null);
+  const [result, setResult] = useState(null);
+  const [analysisType, setAnalysisType] = useState(null);
 
-  // step: 'start' | 'birthdate' | 'timecheck' | 'timeselect' | 'quiz' | 'result'
+  const handleRestart = () => {
+    setStep('start');
+    setBirthDate(null);
+    setBirthTime(null);
+    setAnswers([]);
+    setResult(null);
+    setAnalysisType(null);
+  };
+
+  const handleMorePrecise = () => {
+    setStep('precise');
+  };
 
   const renderStep = () => {
     switch (step) {
       case 'start':
         return <StartScreen onNext={() => setStep('birthdate')} />;
+
       case 'birthdate':
         return (
           <BirthDateInput
@@ -28,51 +42,82 @@ function App() {
             }}
           />
         );
+
       case 'timecheck':
         return (
           <TimeKnownCheck
-            onKnow={() => setStep('timeselect')}
-            onNotKnow={() => setStep('quiz')}
+            onExact={() => {
+              setAnalysisType('exact');
+              setStep('timeselect');
+            }}
+            onQuick={() => {
+              setAnalysisType('quick');
+              setStep('quiz');
+            }}
+            onPrecise={() => {
+              setAnalysisType('precise');
+              setStep('precise');
+            }}
           />
         );
+
       case 'timeselect':
         return (
           <TimeSelector
             onSelect={(time) => {
               setBirthTime(time);
+              setResult({
+                primary: { sign: time, score: 100, probability: 100 },
+                secondary: null,
+                confidence: 'exact'
+              });
               setStep('result');
             }}
           />
         );
+
       case 'quiz':
         return (
           <QuizQuestion
             answers={answers}
             onAnswer={(answer) => setAnswers([...answers, answer])}
-            onComplete={(estimated) => {
-              setEstimatedTime(estimated);
+            onComplete={(calculatedResult) => {
+              setResult(calculatedResult);
               setStep('result');
             }}
           />
         );
+
+      case 'precise':
+        return (
+          <PreciseAnalysis
+            birthDate={birthDate}
+            previousResult={result}
+            onComplete={(preciseResult) => {
+              setResult(preciseResult);
+              setStep('result');
+            }}
+            onBack={() => setStep('timecheck')}
+          />
+        );
+
       case 'result':
         return (
           <ResultScreen
             birthDate={birthDate}
-            birthTime={birthTime || estimatedTime}
-            isEstimated={!birthTime}
+            result={result}
+            analysisType={analysisType}
+            onRestart={handleRestart}
+            onMorePrecise={handleMorePrecise}
           />
         );
+
       default:
         return <StartScreen onNext={() => setStep('birthdate')} />;
     }
   };
 
-  return (
-    <div className="min-h-screen bg-fitin-light">
-      {renderStep()}
-    </div>
-  );
+  return <div className="min-h-screen bg-fitin-light">{renderStep()}</div>;
 }
 
 export default App;
