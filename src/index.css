@@ -1,0 +1,21 @@
+@import "tailwindcss";
+
+/* Pretendard 폰트 */
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+/* FIT IN 브랜드 컬러 테마 */
+@theme {
+  --color-fitin-primary: #FF6B9D;
+  --color-fitin-secondary: #7DD3C0;
+  --color-fitin-dark: #2D3748;
+  --color-fitin-light: #FFF5F8;
+  --color-fitin-accent: #FFD93D;
+
+  --font-family-sans: 'Pretendard', sans-serif;
+}
+
+body {
+  font-family: var(--font-family-sans);
+  background-color: var(--color-fitin-light);
+  margin: 0;
+}
