@@ -89,7 +89,7 @@ function PreciseAnalysis({ birthDate, previousResult, onComplete, onBack }) {
       const aiResponse = await chatWithGemini(userMessage, { birthDate, previousResult });
       setMessages(prev => [...prev, { role: 'ai', content: aiResponse }]);
       setQuestionCount(prev => prev + 1);
-    } catch (err) {
+    } catch {
       setMessages(prev => [...prev, {
         role: 'ai',
         content: '죄송합니다, 응답 중 오류가 발생했습니다. 다시 시도해주세요.'

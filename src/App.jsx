@@ -11,7 +11,7 @@ import ResultScreen from './components/quiz/ResultScreen';
 function App() {
   const [step, setStep] = useState('start');
   const [birthDate, setBirthDate] = useState(null);
-  const [birthTime, setBirthTime] = useState(null);
+  const [, setBirthTime] = useState(null);
   const [answers, setAnswers] = useState([]);
   const [result, setResult] = useState(null);
   const [analysisType, setAnalysisType] = useState(null);

@@ -41,7 +41,7 @@ export async function copyLink() {
   try {
     await navigator.clipboard.writeText(window.location.origin);
     alert('링크가 복사되었습니다!');
-  } catch (err) {
+  } catch {
     // fallback for older browsers
     const textArea = document.createElement('textarea');
     textArea.value = window.location.origin;

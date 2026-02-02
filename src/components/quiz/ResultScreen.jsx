@@ -4,7 +4,7 @@ import { getConfidenceText } from '../../utils/calculateScore';
 import { shareToTwitter, copyLink } from '../../utils/shareUtils';
 import Button from '../common/Button';
 
-function ResultScreen({ birthDate, result, analysisType, onRestart, onMorePrecise }) {
+function ResultScreen({ result, analysisType, onRestart, onMorePrecise }) {
   const [showContent, setShowContent] = useState(false);
   const primaryResult = timeResults[result.primary.sign];
   const secondaryResult = result.secondary ? timeResults[result.secondary.sign] : null;
