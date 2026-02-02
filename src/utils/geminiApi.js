@@ -13,7 +13,8 @@ function initializeGemini() {
 
   if (!genAI) {
     genAI = new GoogleGenerativeAI(API_KEY);
-    model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    // gemini-pro 모델 사용 (더 안정적)
+    model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
   }
   return true;
 }
@@ -83,7 +84,8 @@ ${conversationHistory.map(msg => `${msg.role === 'user' ? '사용자' : 'AI'}: $
     return text;
   } catch (error) {
     console.error('Gemini API Error:', error);
-    throw new Error('AI 응답을 받는 중 오류가 발생했습니다.');
+    console.error('Error details:', error.message, error.stack);
+    throw new Error(`AI 응답 오류: ${error.message || '알 수 없는 오류'}`);
   }
 }
 
@@ -136,7 +138,8 @@ ${conversationHistory.map(msg => `${msg.role === 'user' ? '사용자' : 'AI'}: $
     throw new Error('분석 결과를 파싱할 수 없습니다.');
   } catch (error) {
     console.error('Final Analysis Error:', error);
-    throw new Error('최종 분석 중 오류가 발생했습니다.');
+    console.error('Error details:', error.message, error.stack);
+    throw new Error(`최종 분석 오류: ${error.message || '알 수 없는 오류'}`);
   }
 }
 
@@ -155,9 +158,11 @@ export async function getInitialQuestion(context = {}) {
 
 사용자의 출생 시간을 더 정확히 추정하기 위해 첫 번째 질문을 해주세요.
 부모님이나 가족에게 들은 출산 관련 이야기를 물어보는 것이 좋습니다.
-친근하고 따뜻한 말투로 질문하세요.`;
+친근하고 따뜻한 말투로 질문하세요.
+한국어로 답변하세요.`;
 
   try {
+    console.log('Calling Gemini API with key:', API_KEY ? 'Key exists' : 'No key');
     const result = await model.generateContent(initialPrompt);
     const response = await result.response;
     const text = response.text();
@@ -167,11 +172,43 @@ export async function getInitialQuestion(context = {}) {
     return text;
   } catch (error) {
     console.error('Initial Question Error:', error);
-    throw new Error('첫 질문을 생성하는 중 오류가 발생했습니다.');
+    console.error('Error name:', error.name);
+    console.error('Error message:', error.message);
+    console.error('Error stack:', error.stack);
+
+    // 더 자세한 에러 메시지 제공
+    let errorMsg = '첫 질문 생성 오류';
+    if (error.message?.includes('API_KEY')) {
+      errorMsg = 'API 키가 유효하지 않습니다. Google AI Studio에서 키를 확인해주세요.';
+    } else if (error.message?.includes('quota')) {
+      errorMsg = 'API 사용량 한도에 도달했습니다. 잠시 후 다시 시도해주세요.';
+    } else if (error.message?.includes('network') || error.message?.includes('fetch')) {
+      errorMsg = '네트워크 연결을 확인해주세요.';
+    } else {
+      errorMsg = `오류: ${error.message || '알 수 없는 오류'}`;
+    }
+
+    throw new Error(errorMsg);
   }
 }
 
 // API 키 확인
 export function isApiKeySet() {
   return !!API_KEY;
+}
+
+// API 연결 테스트
+export async function testApiConnection() {
+  if (!initializeGemini()) {
+    return { success: false, error: 'API 키가 설정되지 않았습니다.' };
+  }
+
+  try {
+    const result = await model.generateContent('안녕하세요. 테스트입니다. "연결 성공"이라고만 답해주세요.');
+    const response = await result.response;
+    const text = response.text();
+    return { success: true, response: text };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
 }

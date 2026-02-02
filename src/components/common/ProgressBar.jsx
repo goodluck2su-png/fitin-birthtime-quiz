@@ -1,17 +1,27 @@
-function ProgressBar({ current, total }) {
-  const percentage = (current / total) * 100;
-
+function ProgressBar({ current, total, showLabel = true }) {
   return (
-    <div className="w-full max-w-md">
-      <div className="flex justify-between text-sm text-gray-500 mb-2">
-        <span>Q{current}</span>
-        <span>{current} / {total}</span>
-      </div>
-      <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-        <div
-          className="h-full bg-fitin-primary rounded-full transition-all duration-300"
-          style={{ width: `${percentage}%` }}
-        />
+    <div className="w-full">
+      {showLabel && (
+        <div className="flex justify-between text-sm text-gray-500 mb-3">
+          <span className="font-medium">Q{current}</span>
+          <span>{current} / {total}</span>
+        </div>
+      )}
+
+      {/* 도트 스타일 프로그레스 */}
+      <div className="flex justify-center gap-2">
+        {Array.from({ length: total }, (_, i) => (
+          <div
+            key={i}
+            className={`h-2 rounded-full transition-all duration-300 ${
+              i < current
+                ? 'w-6 bg-fitin-primary'
+                : i === current
+                ? 'w-4 bg-fitin-primary/50'
+                : 'w-2 bg-gray-200'
+            }`}
+          />
+        ))}
       </div>
     </div>
   );

@@ -5,6 +5,7 @@ import TimeKnownCheck from './components/quiz/TimeKnownCheck';
 import TimeSelector from './components/quiz/TimeSelector';
 import QuizQuestion from './components/quiz/QuizQuestion';
 import PreciseAnalysis from './components/quiz/PreciseAnalysis';
+import LoadingScreen from './components/quiz/LoadingScreen';
 import ResultScreen from './components/quiz/ResultScreen';
 
 function App() {
@@ -14,7 +15,44 @@ function App() {
   const [answers, setAnswers] = useState([]);
   const [result, setResult] = useState(null);
   const [analysisType, setAnalysisType] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
+  // 뒤로가기 핸들러
+  const handleBack = () => {
+    switch (step) {
+      case 'birthdate': setStep('start'); break;
+      case 'timecheck': setStep('birthdate'); break;
+      case 'timeselect': setStep('timecheck'); break;
+      case 'quiz':
+        if (answers.length > 0) {
+          setAnswers(answers.slice(0, -1));
+        } else {
+          setStep('timecheck');
+        }
+        break;
+      case 'precise': setStep('timecheck'); break;
+      case 'result':
+        if (analysisType === 'exact') setStep('timeselect');
+        else if (analysisType === 'quick') setStep('quiz');
+        else setStep('timecheck');
+        break;
+      default: break;
+    }
+  };
+
+  // 결과 화면으로 이동 (로딩 포함)
+  const goToResult = (resultData, type) => {
+    setIsLoading(true);
+    setResult(resultData);
+    setAnalysisType(type);
+
+    setTimeout(() => {
+      setIsLoading(false);
+      setStep('result');
+    }, 2000);
+  };
+
+  // 재시작
   const handleRestart = () => {
     setStep('start');
     setBirthDate(null);
@@ -24,9 +62,15 @@ function App() {
     setAnalysisType(null);
   };
 
+  // 더 정밀하게
   const handleMorePrecise = () => {
     setStep('precise');
   };
+
+  // 로딩 화면
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
 
   const renderStep = () => {
     switch (step) {
@@ -36,28 +80,18 @@ function App() {
       case 'birthdate':
         return (
           <BirthDateInput
-            onNext={(date) => {
-              setBirthDate(date);
-              setStep('timecheck');
-            }}
+            onNext={(date) => { setBirthDate(date); setStep('timecheck'); }}
+            onBack={handleBack}
           />
         );
 
       case 'timecheck':
         return (
           <TimeKnownCheck
-            onExact={() => {
-              setAnalysisType('exact');
-              setStep('timeselect');
-            }}
-            onQuick={() => {
-              setAnalysisType('quick');
-              setStep('quiz');
-            }}
-            onPrecise={() => {
-              setAnalysisType('precise');
-              setStep('precise');
-            }}
+            onExact={() => { setAnalysisType('exact'); setStep('timeselect'); }}
+            onQuick={() => { setAnalysisType('quick'); setAnswers([]); setStep('quiz'); }}
+            onPrecise={() => { setAnalysisType('precise'); setStep('precise'); }}
+            onBack={handleBack}
           />
         );
 
@@ -66,13 +100,13 @@ function App() {
           <TimeSelector
             onSelect={(time) => {
               setBirthTime(time);
-              setResult({
+              goToResult({
                 primary: { sign: time, score: 100, probability: 100 },
                 secondary: null,
                 confidence: 'exact'
-              });
-              setStep('result');
+              }, 'exact');
             }}
+            onBack={handleBack}
           />
         );
 
@@ -80,11 +114,9 @@ function App() {
         return (
           <QuizQuestion
             answers={answers}
-            onAnswer={(answer) => setAnswers([...answers, answer])}
-            onComplete={(calculatedResult) => {
-              setResult(calculatedResult);
-              setStep('result');
-            }}
+            setAnswers={setAnswers}
+            onComplete={(calcResult) => goToResult(calcResult, 'quick')}
+            onBack={handleBack}
           />
         );
 
@@ -93,11 +125,7 @@ function App() {
           <PreciseAnalysis
             birthDate={birthDate}
             previousResult={result}
-            onComplete={(preciseResult) => {
-              setResult(preciseResult);
-              setStep('result');
-            }}
-            onBack={() => setStep('timecheck')}
+            onBack={handleBack}
           />
         );
 

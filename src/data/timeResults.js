@@ -1,3 +1,20 @@
+// 시간 선택 옵션 (TimeSelector에서 사용)
+export const timeOptions = [
+  { value: '자', label: '자시', time: '23:00~01:00', emoji: '🌙', period: '밤' },
+  { value: '축', label: '축시', time: '01:00~03:00', emoji: '🐂', period: '새벽' },
+  { value: '인', label: '인시', time: '03:00~05:00', emoji: '🐅', period: '새벽' },
+  { value: '묘', label: '묘시', time: '05:00~07:00', emoji: '🐰', period: '아침' },
+  { value: '진', label: '진시', time: '07:00~09:00', emoji: '🐉', period: '아침' },
+  { value: '사', label: '사시', time: '09:00~11:00', emoji: '🐍', period: '오전' },
+  { value: '오', label: '오시', time: '11:00~13:00', emoji: '🐴', period: '낮' },
+  { value: '미', label: '미시', time: '13:00~15:00', emoji: '🐑', period: '오후' },
+  { value: '신', label: '신시', time: '15:00~17:00', emoji: '🐵', period: '오후' },
+  { value: '유', label: '유시', time: '17:00~19:00', emoji: '🐔', period: '저녁' },
+  { value: '술', label: '술시', time: '19:00~21:00', emoji: '🐕', period: '저녁' },
+  { value: '해', label: '해시', time: '21:00~23:00', emoji: '🐷', period: '밤' },
+];
+
+// 12시진 결과 데이터
 export const timeResults = {
   자: {
     timeKorean: "자시 (子時)",
